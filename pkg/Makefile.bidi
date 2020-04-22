@@ -1,0 +1,18 @@
+PROJ=	liblpm
+
+all: rpm
+
+prepare: specmunge
+	mkdir -p SOURCES && tar czpvf SOURCES/$(PROJ).tar.gz ../src
+
+rpm: prepare
+	rpmbuild -ba -v --define "_topdir ${PWD}" SPECS/$(PROJ).spec
+
+clean:
+	rm -rf BUILD BUILDROOT RPMS SOURCES SRPMS
+
+specmunge:
+	git checkout SPECS/$(PROJ).spec
+	sed -i -e "/%define version/c\%define version $$(cat version.txt)" -e '/BuildRequires:.*make/a BuildRequires:  libasan\nBuildRequires:  libubsan' SPECS/$(PROJ).spec
+
+.PHONY: all rpm clean specmunge
