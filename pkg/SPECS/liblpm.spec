@@ -4,7 +4,7 @@
 
 Name:		liblpm
 Version:	%{version}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Longest Prefix Match (LPM) library
 Group:		System Environment/Libraries
 License:	BSD
