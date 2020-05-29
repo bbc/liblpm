@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
+#include <lua-5.1/lua.h>
+#include <lua-5.1/lauxlib.h>
+#include <lua-5.1/lualib.h>
 
 #include "lpm.h"
 

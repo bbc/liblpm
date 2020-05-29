@@ -1,5 +1,5 @@
 PROJ=	liblpm
-LUA_VERSION := 5.3
+LUA_VERSION := 5.1
 
 all: rpm
 
@@ -16,6 +16,7 @@ specmunge:
 	git checkout SPECS/$(PROJ).spec
 	sed -i -e "/%define version/c\%define version $$(cat version.txt)" \
 		-e '/BuildRequires:.*make/a BuildRequires:  libasan\nBuildRequires:  libubsan' \
-		-e "/%define luaver/c\%define luaver $(LUA_VERSION)"  SPECS/$(PROJ).spec
+		-e "/%define luaver/c\%define luaver $(LUA_VERSION)" \
+		-e 's/lua >=/compat-lua >=/' -e 's/lua-devel >=/compat-lua-devel >=/' SPECS/$(PROJ).spec
 
 .PHONY: all rpm clean specmunge
