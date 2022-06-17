@@ -1,0 +1,16 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - certee-fetch
+  pre_build:
+    commands:
+      - cd pkg
+      - cp Makefile.bidi Makefile
+  build:
+    commands:
+      - make prepare
+      - mock-build --os 8
+  post_build:
+    commands:
+      - "if [[ \"${MD_ENVIRONMENT}\" == \"live\" ]] ; then for rpm in $(ls ./RPMS/liblpm-*.rpm); do repo upload ${rpm} md-el8/revisions/head; done; fi"
