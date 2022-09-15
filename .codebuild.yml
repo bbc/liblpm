@@ -15,4 +15,10 @@ phases:
   post_build:
     on-failure: ABORT
     commands:
-      - "if [[ \"${MD_ENVIRONMENT}\" == \"live\" ]] ; then for rpm in $(ls ./RPMS/liblpm-*.rpm); do repo upload ${rpm} md-el8/revisions/head; done; fi"
+      - |-
+        if [[ "${MD_ENVIRONMENT}" == "live" ]] ; then
+            for rpm in $(ls ./RPMS/liblpm-*.rpm)
+            do
+                repo upload ${rpm} md-el8/revisions/head
+            done
+        fi
