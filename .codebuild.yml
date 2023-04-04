@@ -17,8 +17,9 @@ phases:
     commands:
       - |-
         if [[ "${MD_ENVIRONMENT}" == "live" ]] ; then
+            RELEASE="$(grep CPE_NAME /etc/os-release | sed 's/[^0-9]//g')"
             for rpm in $(ls ./RPMS/liblpm-*.rpm)
             do
-                repo upload ${rpm} md-el8/revisions/head
+                repo upload ${rpm} md-el${RELEASE}/revisions/head
             done
         fi
