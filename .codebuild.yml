@@ -7,11 +7,12 @@ phases:
     commands:
       - cd pkg
       - cp Makefile.bidi Makefile
+      - RELEASE="$(grep CPE_NAME /etc/os-release | sed 's/[^0-9]//g')"
   build:
     on-failure: ABORT
     commands:
       - make prepare
-      - mock-build --os 8
+      - mock-build --os ${RELEASE}
   post_build:
     on-failure: ABORT
     commands:
@@ -19,6 +20,6 @@ phases:
         if [[ "${MD_ENVIRONMENT}" == "live" ]] ; then
             for rpm in $(ls ./RPMS/liblpm-*.rpm)
             do
-                repo upload ${rpm} md-el8/revisions/head
+                repo upload ${rpm} md-el${RELEASE}/revisions/head
             done
         fi
