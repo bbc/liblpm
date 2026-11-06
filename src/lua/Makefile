@@ -36,27 +36,33 @@ LUA_CFLAGS?=	$(shell pkg-config --cflags lua)
 LUA_LDFLAGS?=	$(shell pkg-config --cflags --libs lua)
 CFLAGS+=	$(LUA_CFLAGS) -I.. -fPIC
 LDFLAGS+=	$(LUA_LDFLAGS)
-LDFLAGS+=	-L../.libs -llpm
+# Build outside src/ so artifacts never end up in the source tarball.
+OUTDIR?=	../../build/lua
+LIBLPM_OUTDIR?=	../../build
+LDFLAGS+=	-L$(LIBLPM_OUTDIR)/.libs -llpm
 
-OBJS=		lpm_lua.o
+OBJS=		$(OUTDIR)/lpm_lua.o
 LIB=		lpm
 
 install:	LUA_ILIBDIR=	$(DESTDIR)/$(LUA_LIBDIR)/
 
 obj: $(OBJS)
 
-lib: $(LIB).so
+lib: $(OUTDIR)/$(LIB).so
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
+$(OUTDIR):
+	mkdir -p $@
 
-$(LIB).so: $(OBJS)
-	$(CC) $(LDFLAGS) -fPIC -shared -o $@ $(notdir $^)
+$(OUTDIR)/%.o: %.c | $(OUTDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OUTDIR)/$(LIB).so: $(OBJS)
+	$(CC) $(LDFLAGS) -fPIC -shared -o $@ $^
 
 install:
-	mkdir -p $(LUA_ILIBDIR) && install -c lpm.so $(LUA_ILIBDIR)
+	mkdir -p $(LUA_ILIBDIR) && install -c $(OUTDIR)/lpm.so $(LUA_ILIBDIR)
 
 clean:
-	rm -rf .libs *.so *.o *.lo *.la t_$(PROJ)
+	rm -rf $(OUTDIR) .libs *.so *.o *.lo *.la t_$(PROJ)
 
 .PHONY: all obj lib install clean
