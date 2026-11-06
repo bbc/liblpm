@@ -40,44 +40,49 @@ else
 CFLAGS+=	-DNDEBUG
 endif
 
+# Build outside src/ so artifacts never end up in the source tarball.
+OUTDIR?=	../build
+
 # C library
 INCS=		lpm.h
-OBJS=		lpm.o
+OBJS=		$(OUTDIR)/lpm.o
 LIB=		liblpm
 
-$(LIB).la:	LDFLAGS+=	-rpath $(LIBDIR) -version-info 1:0:0
+$(OUTDIR)/$(LIB).la:	LDFLAGS+=	-rpath $(LIBDIR) -version-info 1:0:0
 install/%.la:	ILIBDIR=	$(DESTDIR)/$(LIBDIR)
 install:	IINCDIR=	$(DESTDIR)/$(INCDIR)/
 #install:	IMANDIR=	$(DESTDIR)/$(MANDIR)/man3/
 
 obj: $(OBJS)
 
-lib: $(LIB).la
+lib: $(OUTDIR)/$(LIB).la
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
+$(OUTDIR):
+	mkdir -p $@
 
-%.lo: %.c
-	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -fPIC -c $<
+$(OUTDIR)/%.o: %.c | $(OUTDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(LIB).la: $(shell echo $(OBJS) | sed 's/\.o/\.lo/g')
-	libtool --mode=link --tag CC $(CC) $(LDFLAGS) -o $@ $(notdir $^)
+$(OUTDIR)/%.lo: %.c | $(OUTDIR)
+	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -fPIC -c $< -o $@
 
-install/%.la: %.la
+$(OUTDIR)/$(LIB).la: $(OUTDIR)/lpm.lo
+	libtool --mode=link --tag CC $(CC) $(LDFLAGS) -o $@ $^
+
+install/%.la: $(OUTDIR)/%.la
 	mkdir -p $(ILIBDIR)
-	libtool --mode=install install -c $(notdir $@) $(ILIBDIR)/$(notdir $@)
+	libtool --mode=install install -c $< $(ILIBDIR)/$(notdir $@)
 
 install: $(addprefix install/,$(LIB).la)
 	libtool --mode=finish $(LIBDIR)
 	mkdir -p $(IINCDIR) && install -c $(INCS) $(IINCDIR)
 	#mkdir -p $(IMANDIR) && install -c $(MANS) $(IMANDIR)
 
-tests: $(OBJS) t_$(PROJ).o
-	$(CC) $(CFLAGS) $^ -o t_$(PROJ)
-	MALLOC_CHECK_=3 ./t_$(PROJ)
+tests: $(OBJS) $(OUTDIR)/t_$(PROJ).o
+	$(CC) $(CFLAGS) $^ -o $(OUTDIR)/t_$(PROJ)
+	MALLOC_CHECK_=3 $(OUTDIR)/t_$(PROJ)
 
 clean:
-	libtool --mode=clean rm
-	rm -rf .libs *.so *.o *.lo *.la t_$(PROJ)
+	rm -rf $(OUTDIR) .libs *.so *.o *.lo *.la t_$(PROJ)
 
 .PHONY: all obj lib install tests clean
