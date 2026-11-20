@@ -1,3 +1,7 @@
+# Forked from rmind/liblpm
+
+We've disabled github actions in repository settings in our fork.
+
 # Longest Prefix Match (LPM) library
 
 [![Build Status](https://travis-ci.org/rmind/liblpm.svg?branch=master)](https://travis-ci.org/rmind/liblpm)
