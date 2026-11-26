@@ -39,7 +39,9 @@ LDFLAGS+=	$(LUA_LDFLAGS)
 # Build outside src/ so artifacts never end up in the source tarball.
 OUTDIR?=	../../build/lua
 LIBLPM_OUTDIR?=	../../build
-LDFLAGS+=	-L$(LIBLPM_OUTDIR)/.libs -llpm
+LDFLAGS+=	-L$(LIBLPM_OUTDIR)/.libs
+# Libraries must follow the objects, else --as-needed drops them.
+LDLIBS+=	-llpm
 
 OBJS=		$(OUTDIR)/lpm_lua.o
 LIB=		lpm
@@ -57,7 +59,7 @@ $(OUTDIR)/%.o: %.c | $(OUTDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OUTDIR)/$(LIB).so: $(OBJS)
-	$(CC) $(LDFLAGS) -fPIC -shared -o $@ $^
+	$(CC) $(LDFLAGS) -fPIC -shared -o $@ $^ $(LDLIBS)
 
 install:
 	mkdir -p $(LUA_ILIBDIR) && install -c $(OUTDIR)/lpm.so $(LUA_ILIBDIR)
